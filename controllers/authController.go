@@ -1,6 +1,11 @@
 package controllers
 
 import (
+	"fmt"
+	"strconv"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sandorbiba/go-admin/database"
 	"github.com/sandorbiba/go-admin/models"
@@ -60,5 +65,19 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(user)
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		// convert to string
+		Issuer: strconv.Itoa(int(user.Id)),
+		// 1 day
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	token, err := claims.SignedString([]byte("Almafa"))
+	
+	if err != nil {
+		fmt.Println(err)		
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return c.JSON(token)
 }
