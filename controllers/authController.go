@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -75,7 +74,6 @@ func Login(c *fiber.Ctx) error {
 	token, err := claims.SignedString([]byte("Almafa"))
 	
 	if err != nil {
-		fmt.Println(err)		
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
@@ -120,4 +118,19 @@ func User(c *fiber.Ctx) error  {
 
 
 	return c.JSON(user)
+}
+
+func Logout(c *fiber.Ctx) error  {
+	cookie := fiber.Cookie{
+		Name: "jwt",
+		Value: "",
+		Expires: time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	}
+
+	c.Cookie(&cookie)
+
+	return c.JSON(fiber.Map{
+		"message": "success",
+	})
 }
